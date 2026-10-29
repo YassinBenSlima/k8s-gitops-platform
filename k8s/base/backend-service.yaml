@@ -1,0 +1,16 @@
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: taskboard-api
+  labels:
+    app: taskboard-api
+spec:
+  type: ClusterIP
+  selector:
+    app: taskboard-api
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 8000
+      protocol: TCP
