@@ -1,18 +1,33 @@
-FROM python:3.12-slim
 
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
+# Stage 1: Build
+FROM maven:3.9-eclipse-temurin-25 AS build
 
 WORKDIR /app
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+COPY pom.xml .
+COPY .mvn .mvn
+COPY mvnw .
 
-COPY main.py .
+RUN chmod +x mvnw
 
-RUN useradd --create-home --uid 10001 appuser
-USER appuser
+RUN ./mvnw dependency:go-offline
 
-EXPOSE 8000
+COPY src ./src
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+RUN ./mvnw clean package -DskipTests
+
+
+# Stage 2: Runtime
+FROM eclipse-temurin:25-jre
+
+WORKDIR /app
+
+RUN useradd --system --uid 10001 appuser
+
+COPY --from=build /app/target/backend-0.0.1-SNAPSHOT.jar app.jar
+
+USER 10001
+
+EXPOSE 8080
+
+ENTRYPOINT ["java", "-jar", "app.jar"]

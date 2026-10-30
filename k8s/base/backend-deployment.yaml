@@ -1,4 +1,3 @@
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -17,19 +16,37 @@ spec:
     spec:
       containers:
         - name: backend
-          image: taskboard-api:1.0.0
+          image: taskboard-api:2.0.0
           imagePullPolicy: IfNotPresent
+
           ports:
-            - containerPort: 8000
+            - containerPort: 8080
+
+          env:
+            - name: DB_HOST
+              value: "postgres"
+            - name: DB_PORT
+              value: "5432"
+
+          envFrom:
+            - secretRef:
+                name: postgres-secret
+
+          startupProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+            periodSeconds: 10
+            failureThreshold: 30
+
           readinessProbe:
             httpGet:
-              path: /health
-              port: 8000
-            initialDelaySeconds: 5
+              path: /actuator/health/readiness
+              port: 8080
             periodSeconds: 10
+
           livenessProbe:
             httpGet:
-              path: /health
-              port: 8000
-            initialDelaySeconds: 10
+              path: /actuator/health/liveness
+              port: 8080
             periodSeconds: 20
