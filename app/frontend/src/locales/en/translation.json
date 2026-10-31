@@ -1,0 +1,186 @@
+{
+  "app": {
+    "name": "SmartOrtho",
+    "tagline": "Orthodontic Practice Management"
+  },
+  "language": {
+    "en": "English",
+    "fr": "French",
+    "ar": "Arabic"
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "patients": "Patients",
+    "appointments": "Appointments",
+    "diagnostics": "Diagnostics",
+    "treatments": "Treatments",
+    "communication": "Communication",
+    "stock": "Stock",
+    "administration": "Administration",
+    "aiTools": "AI Tools",
+    "users": "Users"
+  },
+  "header": {
+    "search": "Search",
+    "notifications": "View notifications",
+    "markAllAsRead": "Mark all as read",
+    "viewAll": "View all notifications"
+  },
+  "login": {
+    "subtitle": "Orthodontic Practice Management",
+    "email": "Email",
+    "emailPlaceholder": "Enter your email",
+    "password": "Password",
+    "passwordPlaceholder": "Enter your password",
+    "rememberMe": "Remember me",
+    "forgotPassword": "Forgot password?",
+    "signIn": "Sign In",
+    "signingIn": "Signing in...",
+    "noAccount": "Don't have an account?",
+    "signUp": "Sign up",
+    "invalidEmail": "Please enter a valid email address",
+    "invalidPassword": "Password must be at least 6 characters",
+    "features": {
+      "aiPowered": "AI-Powered",
+      "aiPoweredDesc": "Smart diagnostics and treatment planning",
+      "patientManagement": "Patient Management",
+      "patientManagementDesc": "Complete patient records and tracking",
+      "realTimeAnalytics": "Real-Time Analytics",
+      "realTimeAnalyticsDesc": "Track your practice performance"
+    }
+  },
+  "dashboard": {
+    "welcome": "Welcome back, Dr. Dupont",
+    "subtitle": "Here's what's happening with your practice today",
+    "stats": {
+      "totalPatients": "Total Patients",
+      "appointmentsToday": "Appointments Today",
+      "activePatients": "Active Patients",
+      "completionRate": "Completion Rate"
+    },
+    "todayAppointments": "Today's Appointments",
+    "recentPatients": "Recent Patients",
+    "streak": {
+      "days": "days",
+      "today": "today",
+      "loggedInToday": "Logged in today",
+      "lastLogin": "Last login:",
+      "activeStreak": "Active Streak"
+    }
+  },
+  "patients": {
+    "title": "Patient Management",
+    "subtitle": "Manage and track all your patients",
+    "newPatient": "New Patient",
+    "search": "Search patients...",
+    "filters": {
+      "all": "All Patients",
+      "active": "Active",
+      "inactive": "Inactive",
+      "filter": "Filter"
+    },
+    "name": "Name",
+    "bornOn": "Born on",
+    "treatment": "Treatment",
+    "nextAppointment": "Next Appointment",
+    "status": "Status",
+    "actions": "Actions",
+    "view": "View",
+    "noMatch": "No patients found matching your search",
+    "email": "Email",
+    "phone": "Phone",
+    "address": "Address"
+  },
+  "patientForm": {
+    "newPatient": "New Patient",
+    "personalInfo": "Personal Information",
+    "medicalInfo": "Medical Information",
+    "contactDetails": "Contact Details",
+    "enterIdentityInfo": "Enter patient identity information",
+    "enterMedicalInfo": "Enter patient medical information",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "dateOfBirth": "Date of Birth",
+    "profession": "Profession",
+    "city": "City",
+    "postalCode": "Postal Code",
+    "insurance": "Insurance",
+    "selectInsurance": "Select insurance",
+    "fileNumber": "File Number",
+    "primaryPhysician": "Primary Physician",
+    "medicalHistory": "Medical History",
+    "allergies": "Allergies",
+    "additionalNotes": "Additional Notes",
+    "required": "This field is required",
+    "invalidEmail": "Invalid email address",
+    "invalidPhone": "Invalid phone number",
+    "previous": "Previous",
+    "next": "Next",
+    "cancel": "Cancel",
+    "save": "Save"
+  },
+  "appointments": {
+    "title": "Appointments",
+    "subtitle": "Manage your appointment calendar",
+    "newAppointment": "New Appointment",
+    "day": "Day",
+    "week": "Week",
+    "month": "Month",
+    "calendar": {
+      "monday": "Mon",
+      "tuesday": "Tue",
+      "wednesday": "Wed",
+      "thursday": "Thu",
+      "friday": "Fri",
+      "saturday": "Sat",
+      "sunday": "Sun"
+    },
+    "appointmentTypes": {
+      "initialConsultation": "Initial Consultation",
+      "checkup": "Checkup",
+      "applianceInstallation": "Appliance Installation",
+      "applianceRemoval": "Appliance Removal",
+      "emergency": "Emergency",
+      "adjustment": "Adjustment",
+      "repair": "Repair",
+      "followUp": "Follow-up"
+    },
+    "status": {
+      "scheduled": "Scheduled",
+      "confirmed": "Confirmed",
+      "pending": "Pending",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "missed": "Missed"
+    }
+  },
+  "diagnostics": {
+    "title": "AI Diagnostics",
+    "subtitle": "Advanced diagnostic tools powered by artificial intelligence",
+    "tabs": {
+      "imageAnalysis": "Image Analysis",
+      "treatmentPlans": "Treatment Plans",
+      "anomalyDetection": "Anomaly Detection",
+      "treatmentDuration": "Treatment Duration"
+    }
+  },
+  "gamification": {
+    "level": {
+      "expertOrthodontist": "Expert Orthodontist"
+    },
+    "badges": {
+      "title": "Badges & Achievements",
+      "patientCare": "Patient Care Expert",
+      "perfectAttendance": "Perfect Attendance",
+      "quickLearner": "Quick Learner",
+      "teamPlayer": "Team Player",
+      "locked": "Locked"
+    }
+  },
+  "stock": {
+    "lowStock": "Low Stock Alert",
+    "lowStockItems": "items",
+    "generateOrder": "Generate Order",
+    "ignore": "Ignore"
+  }
+}

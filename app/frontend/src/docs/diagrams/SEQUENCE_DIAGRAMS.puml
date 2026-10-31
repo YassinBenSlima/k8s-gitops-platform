@@ -1,0 +1,447 @@
+@startuml HealthPilot_Sequence_Diagrams
+
+title HealthPilot - Diagrammes de Séquence
+
+' ============================================================
+' DIAGRAM 1: Authentification & Connexion
+' ============================================================
+
+newpage Séquence 1 - Authentification & Connexion
+
+actor "Praticien" as user
+participant "Page Login" as login
+participant "Auth Service" as auth
+database "Base de données" as db
+participant "Dashboard" as dash
+
+user -> login : Saisir identifiants\n(email + mot de passe)
+login -> auth : POST /api/auth/login
+auth -> db : Vérifier identifiants
+alt Identifiants valides
+    db --> auth : Utilisateur trouvé
+    auth -> auth : Générer JWT Token
+    auth -> db : Enregistrer session\n+ log d'activité
+    auth --> login : 200 OK + Token + Profil
+    login -> login : Stocker token (localStorage)
+    login --> user : Redirection vers Dashboard
+    user -> dash : Accéder au tableau de bord
+    dash -> auth : GET /api/dashboard/stats\n(Header: Bearer Token)
+    auth -> auth : Valider JWT
+    auth -> db : Récupérer statistiques
+    db --> auth : Données dashboard
+    auth --> dash : Stats + Rendez-vous + Alertes
+    dash --> user : Afficher tableau de bord
+else Identifiants invalides
+    db --> auth : Non trouvé / Mot de passe incorrect
+    auth -> db : Log tentative échouée
+    auth --> login : 401 Unauthorized
+    login --> user : Message d'erreur\n"Identifiants incorrects"
+else Compte bloqué (trop de tentatives)
+    db --> auth : Compte verrouillé
+    auth --> login : 423 Locked
+    login --> user : "Compte temporairement bloqué.\nContactez l'administrateur."
+end
+
+' ============================================================
+' DIAGRAM 2: Gestion Patient - Création & Consultation
+' ============================================================
+
+newpage Séquence 2 - Création d'un Nouveau Patient
+
+actor "Secrétaire" as sec
+participant "PatientList" as plist
+participant "NouveauPatient" as npat
+participant "API Patients" as api
+database "Base de données" as db
+participant "Notification\nService" as notif
+
+sec -> plist : Cliquer "Nouveau Patient"
+plist --> npat : Ouvrir formulaire
+
+sec -> npat : Remplir informations personnelles\n(nom, prénom, date naissance, téléphone)
+sec -> npat : Remplir antécédents médicaux
+sec -> npat : Saisir informations assurance
+sec -> npat : Uploader documents\n(carte identité, carte vitale)
+
+npat -> npat : Validation côté client\n(champs requis, formats)
+
+alt Validation OK
+    npat -> api : POST /api/patients
+    api -> db : Vérifier doublon\n(nom + date naissance)
+    alt Patient existant
+        db --> api : Doublon détecté
+        api --> npat : 409 Conflict
+        npat --> sec : "Un patient similaire existe déjà.\nVoulez-vous continuer ?"
+        sec -> npat : Confirmer création
+        npat -> api : POST /api/patients?force=true
+    end
+    api -> db : INSERT patient
+    api -> db : INSERT documents
+    api -> db : INSERT assurance
+    db --> api : Patient créé (ID)
+    api -> notif : Envoyer SMS/Email de bienvenue
+    notif --> api : Notification envoyée
+    api --> npat : 201 Created + Patient
+    npat --> sec : ✅ "Patient créé avec succès"\n+ Redirection vers fiche patient
+else Validation échouée
+    npat --> sec : Afficher erreurs de validation
+end
+
+' ============================================================
+' DIAGRAM 3: Prise de Rendez-vous
+' ============================================================
+
+newpage Séquence 3 - Prise de Rendez-vous
+
+actor "Secrétaire" as sec
+participant "AppointmentList\n(Calendrier)" as cal
+participant "AppointmentCreate" as create
+participant "API RDV" as api
+database "Base de données" as db
+participant "Notification\nService" as notif
+actor "Patient" as pat
+
+sec -> cal : Consulter le calendrier
+cal -> api : GET /api/appointments?date=today
+api -> db : SELECT rendez-vous du jour
+db --> api : Liste des RDV
+api --> cal : Afficher calendrier\navec créneaux
+
+sec -> cal : Cliquer sur créneau libre
+cal --> create : Ouvrir formulaire de création
+
+sec -> create : Sélectionner patient\n(recherche par nom)
+create -> api : GET /api/patients?search=Martin
+api -> db : Recherche patients
+db --> api : Résultats
+api --> create : Liste patients correspondants
+sec -> create : Choisir patient
+
+sec -> create : Sélectionner type de soin
+sec -> create : Choisir praticien
+sec -> create : Confirmer date et heure
+
+create -> api : POST /api/appointments
+api -> db : Vérifier disponibilité praticien
+alt Créneau disponible
+    api -> db : INSERT rendez-vous
+    db --> api : RDV créé
+    api -> notif : Envoyer confirmation patient
+    notif -> pat : SMS "Votre RDV est confirmé\nle 15/01 à 14h30\navec Dr. Martin"
+    notif --> api : Envoyé
+    api --> create : 201 Created
+    create --> sec : ✅ "Rendez-vous confirmé"
+    create --> cal : Rafraîchir calendrier
+else Créneau indisponible
+    api --> create : 409 Conflict
+    create -> api : GET /api/appointments/available\n?praticien=X&date=Y
+    api --> create : Créneaux alternatifs
+    create --> sec : "Créneau indisponible.\nVoici les alternatives :"
+end
+
+' ============================================================
+' DIAGRAM 4: Examen Clinique Complet
+' ============================================================
+
+newpage Séquence 4 - Examen Clinique
+
+actor "Orthodontiste" as doc
+participant "ExamenClinique\n(Page)" as exam
+participant "DentalChart" as chart
+participant "API Examens" as api
+database "Base de données" as db
+participant "AI Analysis\nEngine" as ai
+
+doc -> exam : Ouvrir module Examen Clinique
+exam -> api : GET /api/examens?patient_id=X
+api -> db : SELECT examens du patient
+db --> api : Historique examens
+api --> exam : Afficher liste examens
+
+doc -> exam : Cliquer "Nouvel Examen"
+exam --> exam : Afficher formulaire\n(onglet Interrogatoire)
+
+== Interrogatoire ==
+doc -> exam : Remplir Motif de consultation\n(Adressé par, Motivation)
+doc -> exam : Remplir Pathologies ORL\n(Ventilation, Sommeil, Allergies)
+doc -> exam : Remplir Parafonctions\n(Succion, Interposition)
+doc -> exam : Remplir Dysfonctions\n(Déglutition, Phonation, Bruxisme)
+doc -> exam : Remplir Examen ATM\n(Douleurs, Bruits, Palpation)
+
+== Examen Dentaire ==
+doc -> exam : Basculer vers schéma dentaire
+exam --> chart : Afficher schéma interactif
+doc -> chart : Sélectionner dents concernées\n(cliquer sur les dents)
+chart --> exam : Dents sélectionnées: [11,12,21,22]
+doc -> exam : Remplir observations dentaires\n(caries, implants, fractures)
+
+== Examens Complémentaires ==
+doc -> exam : Basculer onglet "Examens complémentaires"
+doc -> exam : Saisir mesures céphalométriques\n(FMA, ANB, SNA, SNB)
+doc -> exam : Saisir diagnostic dentaire\n(surplomb, recouvrement, classes)
+doc -> exam : Rédiger synthèse diagnostique
+
+== Sauvegarde ==
+doc -> exam : Cliquer "Enregistrer"
+exam -> api : POST /api/examens
+api -> db : BEGIN TRANSACTION
+api -> db : INSERT examen_clinique
+api -> db : INSERT examen_sections (x10)
+api -> db : INSERT reponses_examen (x200)
+api -> db : INSERT examen_dentaire
+api -> db : INSERT mesure_cephalometrique
+api -> db : COMMIT
+db --> api : Examen sauvegardé
+
+api -> ai : Analyser examen (async)
+ai -> ai : Classification du cas\n(Classe I, II, III)
+ai -> db : Stocker résultat analyse
+
+api --> exam : 201 Created
+exam --> doc : ✅ "Examen enregistré avec succès"
+
+' ============================================================
+' DIAGRAM 5: Analyse IA & Recommandations
+' ============================================================
+
+newpage Séquence 5 - Analyse IA & Recommandations de Traitement
+
+actor "Orthodontiste" as doc
+participant "AI Dashboard" as dash
+participant "ML Analysis\nEngine" as ml
+participant "Treatment\nRecommendations" as rec
+participant "Problem\nDetection" as prob
+participant "API IA" as api
+database "Base de données" as db
+participant "ML Model\n(Backend)" as model
+
+doc -> dash : Accéder aux Outils IA
+dash -> api : GET /api/ai/dashboard/stats
+api -> db : Récupérer métriques IA
+db --> api : Stats (cas analysés, recommandations)
+api --> dash : Afficher tableau de bord IA
+
+== Analyse ML ==
+doc -> ml : Sélectionner patient
+doc -> ml : Lancer analyse ML
+ml -> api : POST /api/ai/analyze
+api -> db : Récupérer dossier patient complet\n(examens, photos, mesures)
+db --> api : Données patient
+api -> model : Envoyer données pour analyse
+model -> model : Classification du cas
+model -> model : Évaluation complexité
+model -> model : Prédiction durée traitement
+model -> model : Identification facteurs de risque
+model --> api : Résultats analyse\n(confiance: 93%)
+api -> db : Stocker résultats analyse
+api --> ml : Afficher résultats
+ml --> doc : Rapport d'analyse:\n- Classe II squelettique\n- Complexité: modérée\n- Durée estimée: 18 mois
+
+== Recommandations de Traitement ==
+doc -> rec : Consulter recommandations
+rec -> api : GET /api/ai/recommendations?patient_id=X
+api -> model : Générer plans de traitement
+model -> model : Comparer avec 500+ cas similaires
+model -> model : Calculer taux de réussite
+model --> api : 3-5 plans recommandés
+api --> rec : Plans de traitement
+rec --> doc : Afficher plans:\n1. Appareil fixe (89% succès)\n2. Aligneurs (85% succès)\n3. Mixte (91% succès)
+
+doc -> rec : Sélectionner plan #3
+rec -> api : POST /api/treatments/plan
+api -> db : Créer plan de traitement
+db --> api : Plan créé
+api --> rec : ✅ Plan enregistré
+rec --> doc : "Plan de traitement activé"
+
+== Détection de Problèmes ==
+doc -> prob : Vérifier détection de problèmes
+prob -> api : GET /api/ai/problems?patient_id=X
+api -> model : Analyser progression
+model -> model : Comparer progression\nréelle vs prévue
+model --> api : Problèmes détectés
+api --> prob : Liste des problèmes
+prob --> doc : ⚠️ Alertes:\n1. Progression insuffisante (haute)\n2. RDV manqués (moyenne)\n3. Dépassement durée (basse)
+
+' ============================================================
+' DIAGRAM 6: Facturation & Paiement
+' ============================================================
+
+newpage Séquence 6 - Facturation & Paiement
+
+actor "Secrétaire" as sec
+participant "Facturation" as fact
+participant "Paiements" as pay
+participant "API Finance" as api
+database "Base de données" as db
+participant "Passerelle\nPaiement" as gateway
+participant "SESAM-Vitale" as sesam
+actor "Patient" as pat
+
+== Création Facture ==
+sec -> fact : Créer nouvelle facture
+fact -> api : GET /api/patients/X/treatments
+api -> db : Récupérer soins réalisés
+db --> api : Liste des actes
+api --> fact : Afficher actes à facturer
+
+sec -> fact : Sélectionner actes
+sec -> fact : Appliquer tarifs conventionnels
+fact -> fact : Calculer montants\n(base + dépassement + TVA)
+sec -> fact : Valider facture
+
+fact -> api : POST /api/invoices
+api -> db : INSERT facture
+api -> db : INSERT lignes facture
+db --> api : Facture créée (#F-2025-0042)
+api --> fact : ✅ Facture générée
+
+== Télétransmission FSE ==
+sec -> fact : Télétransmettre FSE
+fact -> api : POST /api/fse
+api -> sesam : Transmettre FSE\n(SESAM-Vitale)
+sesam -> sesam : Vérifier droits patient
+sesam -> sesam : Calculer remboursement
+sesam --> api : FSE acceptée\nRemboursement: 70%
+api -> db : UPDATE facture\n(statut: télétransmise)
+api --> fact : ✅ FSE transmise
+fact --> sec : "Remboursement estimé: 245€\nReste à charge patient: 105€"
+
+== Paiement Patient ==
+sec -> pay : Envoyer lien de paiement
+pay -> api : POST /api/payments/link
+api -> gateway : Créer session paiement
+gateway --> api : URL de paiement
+api -> db : Stocker lien paiement
+api --> pay : Lien généré
+
+pay -> pat : SMS/Email avec lien de paiement
+pat -> gateway : Accéder au lien
+pat -> gateway : Saisir carte bancaire
+gateway -> gateway : Traiter paiement
+alt Paiement accepté
+    gateway --> pat : ✅ Paiement confirmé
+    gateway -> api : Webhook: paiement réussi
+    api -> db : UPDATE facture (statut: payée)
+    api -> db : INSERT mouvement trésorerie
+    api --> sec : Notification: paiement reçu
+else Paiement refusé
+    gateway --> pat : ❌ Paiement refusé
+    gateway -> api : Webhook: paiement échoué
+    api -> db : Log échec paiement
+end
+
+' ============================================================
+' DIAGRAM 7: Gestion des Stocks
+' ============================================================
+
+newpage Séquence 7 - Gestion des Stocks & Réapprovisionnement
+
+actor "Gestionnaire" as gest
+participant "MaterialList" as mat
+participant "LowStockAlert" as alert
+participant "GenerateOrder" as order
+participant "API Stock" as api
+database "Base de données" as db
+participant "Fournisseur\n(Email)" as supplier
+
+== Surveillance Automatique ==
+api -> db : CRON: Vérifier niveaux de stock
+db --> api : Matériaux sous seuil minimum
+api -> alert : Générer alertes
+alert -> gest : 🔔 Notification:\n"3 matériaux en stock bas"
+
+== Consultation Stock ==
+gest -> mat : Consulter inventaire
+mat -> api : GET /api/stock/materials
+api -> db : SELECT matériaux + quantités
+db --> api : Liste matériaux
+api --> mat : Afficher inventaire\navec indicateurs couleur
+
+== Commande Réapprovisionnement ==
+gest -> alert : Consulter alertes stock bas
+alert --> gest : Matériaux critiques:\n- Brackets (5 restants, min: 20)\n- Fils NiTi (2 restants, min: 10)\n- Élastiques (50 restants, min: 100)
+
+gest -> order : Générer bon de commande
+order -> api : GET /api/stock/suppliers
+api --> order : Liste fournisseurs
+
+gest -> order : Sélectionner fournisseur
+gest -> order : Ajuster quantités
+gest -> order : Valider commande
+
+order -> api : POST /api/stock/orders
+api -> db : INSERT bon de commande
+api -> db : INSERT lignes commande
+db --> api : Commande créée (#BC-2025-015)
+api -> supplier : Envoyer commande par email
+supplier --> api : Email envoyé
+api --> order : ✅ Commande envoyée
+order --> gest : "Commande #BC-2025-015\nenvoyée au fournisseur"
+
+== Réception Commande ==
+gest -> mat : Réceptionner commande
+mat -> api : PUT /api/stock/orders/15/receive
+api -> db : UPDATE stock (quantités +)
+api -> db : INSERT mouvement stock\n(type: entrée)
+api -> db : UPDATE commande (statut: reçue)
+db --> api : Stock mis à jour
+api --> mat : ✅ Stock mis à jour
+mat --> gest : "Réception enregistrée.\nNouveaux niveaux de stock affichés."
+
+' ============================================================
+' DIAGRAM 8: Gestion RH - Demande de Congé
+' ============================================================
+
+newpage Séquence 8 - Demande de Congé (RH)
+
+actor "Employé" as emp
+participant "VacationManagement" as vac
+participant "API RH" as api
+database "Base de données" as db
+participant "Notification\nService" as notif
+actor "Manager" as mgr
+
+emp -> vac : Consulter solde de congés
+vac -> api : GET /api/hr/vacations/balance?user_id=X
+api -> db : SELECT solde congés
+db --> api : Solde: 15j restants\n(acquis: 25, pris: 10)
+api --> vac : Afficher solde
+
+emp -> vac : Nouvelle demande de congé
+vac --> vac : Formulaire de demande
+
+emp -> vac : Sélectionner dates\n(du 10/02 au 14/02)
+emp -> vac : Choisir type (congé payé)
+emp -> vac : Ajouter motif (optionnel)
+emp -> vac : Soumettre demande
+
+vac -> api : POST /api/hr/vacations/requests
+api -> db : Vérifier solde suffisant
+api -> db : Vérifier conflits équipe
+alt Pas de conflit
+    api -> db : INSERT demande congé\n(statut: en_attente)
+    db --> api : Demande créée
+    api -> notif : Notifier manager
+    notif -> mgr : 🔔 "Nouvelle demande de congé\nde Jean Dupont (10-14 fév)"
+    api --> vac : ✅ Demande soumise
+    vac --> emp : "Demande envoyée.\nEn attente d'approbation."
+    
+    == Approbation Manager ==
+    mgr -> vac : Consulter demandes en attente
+    vac -> api : GET /api/hr/vacations/requests?status=pending
+    api --> vac : Liste demandes
+    
+    mgr -> vac : Approuver demande
+    vac -> api : PUT /api/hr/vacations/requests/X\n{status: "approved"}
+    api -> db : UPDATE demande (statut: approuvée)
+    api -> db : UPDATE solde congés (-5 jours)
+    api -> notif : Notifier employé
+    notif -> emp : ✅ "Votre congé du 10 au 14 fév\na été approuvé"
+    api --> vac : ✅ Demande approuvée
+else Conflit détecté
+    api --> vac : ⚠️ "Conflit: 2 collègues\ndéjà en congé cette semaine"
+    vac --> emp : "Attention: couverture\ninsuffisante cette semaine.\nSoumettre quand même ?"
+end
+
+@enduml

@@ -1,0 +1,226 @@
+@startuml HealthPilot_Use_Case_Diagrams
+
+title HealthPilot - Diagrammes de Cas d'Utilisation
+
+' ============================================================
+' DIAGRAM 1: Vue Globale du Système
+' ============================================================
+
+left to right direction
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+skinparam usecase {
+    BackgroundColor #F0F9FF
+    BorderColor #3B82F6
+    ArrowColor #1E40AF
+}
+
+actor "Orthodontiste\n(Praticien)" as ortho #LightBlue
+actor "Secrétaire\n(Réceptionniste)" as sec #LightGreen
+actor "Administrateur\nSystème" as admin #LightCoral
+actor "Patient" as patient #LightYellow
+actor "Gestionnaire\nRH" as rh #Plum
+actor "Système IA\n(ML Engine)" as ai #LightGray
+
+rectangle "HealthPilot - Système de Gestion de Cabinet Orthodontique" {
+
+    package "Authentification" {
+        usecase "Se connecter" as UC_LOGIN
+        usecase "Gérer son profil" as UC_PROFILE
+        usecase "Changer mot de passe" as UC_PWD
+        usecase "Configurer 2FA" as UC_2FA
+    }
+
+    package "Gestion des Patients" {
+        usecase "Créer un patient" as UC_PAT_CREATE
+        usecase "Consulter fiche patient" as UC_PAT_VIEW
+        usecase "Modifier informations" as UC_PAT_EDIT
+        usecase "Rechercher un patient" as UC_PAT_SEARCH
+        usecase "Uploader documents" as UC_PAT_DOC
+        usecase "Uploader photos" as UC_PAT_PHOTO
+        usecase "Gérer plan de paiement" as UC_PAT_PAY
+        usecase "Envoyer notification" as UC_PAT_NOTIF
+    }
+
+    package "Rendez-vous" {
+        usecase "Consulter calendrier" as UC_RDV_CAL
+        usecase "Créer un rendez-vous" as UC_RDV_CREATE
+        usecase "Modifier un rendez-vous" as UC_RDV_EDIT
+        usecase "Annuler un rendez-vous" as UC_RDV_CANCEL
+        usecase "Confirmer présence" as UC_RDV_CONFIRM
+        usecase "Optimiser planning (IA)" as UC_RDV_OPTIM
+    }
+
+    package "Diagnostics & Examens" {
+        usecase "Réaliser examen clinique" as UC_DIAG_EXAM
+        usecase "Utiliser schéma dentaire" as UC_DIAG_CHART
+        usecase "Analyser image (IA)" as UC_DIAG_IMG
+        usecase "Détecter anomalies (IA)" as UC_DIAG_ANOM
+        usecase "Estimer durée traitement" as UC_DIAG_DUR
+        usecase "Créer plan de traitement" as UC_DIAG_PLAN
+    }
+
+    package "Suivi de Traitement" {
+        usecase "Suivre évolution" as UC_TRT_EVOL
+        usecase "Comparer photos avant/après" as UC_TRT_PHOTO
+        usecase "Ajouter note de traitement" as UC_TRT_NOTE
+        usecase "Évaluer traitement" as UC_TRT_EVAL
+        usecase "Générer rapport" as UC_TRT_REPORT
+        usecase "Gérer notifications patient" as UC_TRT_NOTIF
+    }
+
+    package "Outils IA" {
+        usecase "Lancer analyse ML" as UC_AI_ANALYZE
+        usecase "Consulter recommandations" as UC_AI_RECO
+        usecase "Détecter problèmes" as UC_AI_PROB
+        usecase "Optimiser planning" as UC_AI_SCHED
+        usecase "Ajuster plan traitement" as UC_AI_ADJUST
+        usecase "Générer rapport IA" as UC_AI_REPORT
+    }
+
+    package "Administration Financière" {
+        usecase "Consulter tableau de bord" as UC_FIN_DASH
+        usecase "Créer facture / honoraire" as UC_FIN_FACT
+        usecase "Créer devis" as UC_FIN_DEVIS
+        usecase "Gérer mutuelles" as UC_FIN_MUT
+        usecase "Télétransmettre FSE" as UC_FIN_FSE
+        usecase "Suivre remboursements" as UC_FIN_REIMB
+        usecase "Gérer paiements en ligne" as UC_FIN_PAY
+        usecase "Générer rapports financiers" as UC_FIN_REPORT
+    }
+
+    package "Gestion des Stocks" {
+        usecase "Consulter inventaire" as UC_STK_LIST
+        usecase "Ajouter matériau" as UC_STK_ADD
+        usecase "Enregistrer mouvement" as UC_STK_MOVE
+        usecase "Consulter alertes stock bas" as UC_STK_ALERT
+        usecase "Générer bon de commande" as UC_STK_ORDER
+    }
+
+    package "Ressources Humaines" {
+        usecase "Consulter annuaire personnel" as UC_HR_DIR
+        usecase "Créer fiche employé" as UC_HR_CREATE
+        usecase "Gérer contrats" as UC_HR_CONTRACT
+        usecase "Demander congé" as UC_HR_LEAVE
+        usecase "Approuver congé" as UC_HR_APPROVE
+        usecase "Évaluer performance" as UC_HR_PERF
+        usecase "Consulter soldes congés" as UC_HR_BALANCE
+    }
+
+    package "Gestion Utilisateurs & Sécurité" {
+        usecase "Créer utilisateur" as UC_USR_CREATE
+        usecase "Gérer permissions" as UC_USR_PERM
+        usecase "Consulter logs d'activité" as UC_USR_LOGS
+        usecase "Configurer sécurité" as UC_USR_SEC
+    }
+
+    package "Communication" {
+        usecase "Envoyer message" as UC_COM_MSG
+        usecase "Consulter notifications" as UC_COM_NOTIF
+        usecase "Gérer templates messages" as UC_COM_TPL
+    }
+
+    package "Imagerie Avancée" {
+        usecase "Éditer image" as UC_IMG_EDIT
+        usecase "Appliquer filtres" as UC_IMG_FILTER
+        usecase "Annoter image" as UC_IMG_ANNOT
+        usecase "Gérer calques" as UC_IMG_LAYER
+        usecase "Analyse IA image" as UC_IMG_AI
+    }
+}
+
+' === Associations Orthodontiste ===
+ortho --> UC_LOGIN
+ortho --> UC_PROFILE
+ortho --> UC_PAT_VIEW
+ortho --> UC_PAT_SEARCH
+ortho --> UC_RDV_CAL
+ortho --> UC_RDV_CREATE
+ortho --> UC_DIAG_EXAM
+ortho --> UC_DIAG_CHART
+ortho --> UC_DIAG_PLAN
+ortho --> UC_TRT_EVOL
+ortho --> UC_TRT_NOTE
+ortho --> UC_TRT_EVAL
+ortho --> UC_TRT_REPORT
+ortho --> UC_AI_ANALYZE
+ortho --> UC_AI_RECO
+ortho --> UC_AI_PROB
+ortho --> UC_IMG_EDIT
+ortho --> UC_IMG_ANNOT
+ortho --> UC_IMG_AI
+
+' === Associations Secrétaire ===
+sec --> UC_LOGIN
+sec --> UC_PAT_CREATE
+sec --> UC_PAT_VIEW
+sec --> UC_PAT_EDIT
+sec --> UC_PAT_SEARCH
+sec --> UC_PAT_DOC
+sec --> UC_PAT_NOTIF
+sec --> UC_RDV_CAL
+sec --> UC_RDV_CREATE
+sec --> UC_RDV_EDIT
+sec --> UC_RDV_CANCEL
+sec --> UC_RDV_CONFIRM
+sec --> UC_FIN_FACT
+sec --> UC_FIN_DEVIS
+sec --> UC_FIN_FSE
+sec --> UC_FIN_PAY
+sec --> UC_STK_LIST
+sec --> UC_STK_ALERT
+sec --> UC_COM_MSG
+sec --> UC_COM_NOTIF
+
+' === Associations Administrateur ===
+admin --> UC_LOGIN
+admin --> UC_USR_CREATE
+admin --> UC_USR_PERM
+admin --> UC_USR_LOGS
+admin --> UC_USR_SEC
+admin --> UC_FIN_DASH
+admin --> UC_FIN_REPORT
+admin --> UC_STK_LIST
+admin --> UC_STK_ADD
+admin --> UC_STK_ORDER
+
+' === Associations Patient ===
+patient --> UC_RDV_CONFIRM
+patient --> UC_PAT_PAY
+
+' === Associations Gestionnaire RH ===
+rh --> UC_LOGIN
+rh --> UC_HR_DIR
+rh --> UC_HR_CREATE
+rh --> UC_HR_CONTRACT
+rh --> UC_HR_APPROVE
+rh --> UC_HR_PERF
+rh --> UC_HR_BALANCE
+rh --> UC_HR_LEAVE
+
+' === Associations Système IA ===
+ai --> UC_DIAG_IMG
+ai --> UC_DIAG_ANOM
+ai --> UC_DIAG_DUR
+ai --> UC_AI_ANALYZE
+ai --> UC_AI_RECO
+ai --> UC_AI_PROB
+ai --> UC_AI_SCHED
+ai --> UC_IMG_AI
+
+' === Relations Include ===
+UC_DIAG_EXAM ..> UC_DIAG_CHART : <<include>>
+UC_FIN_FACT ..> UC_FIN_FSE : <<include>>
+UC_AI_ANALYZE ..> UC_AI_RECO : <<include>>
+UC_RDV_CREATE ..> UC_PAT_NOTIF : <<include>>
+UC_STK_ALERT ..> UC_STK_ORDER : <<include>>
+
+' === Relations Extend ===
+UC_PAT_CREATE ..> UC_PAT_DOC : <<extend>>
+UC_PAT_CREATE ..> UC_PAT_PHOTO : <<extend>>
+UC_AI_PROB ..> UC_AI_ADJUST : <<extend>>
+UC_TRT_EVOL ..> UC_TRT_PHOTO : <<extend>>
+UC_FIN_MUT ..> UC_FIN_REIMB : <<extend>>
+UC_RDV_OPTIM ..> UC_RDV_CREATE : <<extend>>
+
+@enduml

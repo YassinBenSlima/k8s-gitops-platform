@@ -1,0 +1,382 @@
+@startuml HealthPilot_State_Transition_Diagrams
+
+title HealthPilot - Diagrammes d'États-Transitions
+
+' ============================================================
+' DIAGRAM 1: États d'un Rendez-vous
+' ============================================================
+
+state "Rendez-vous" as rdv {
+    [*] --> Planifié : Création RDV
+
+    Planifié --> Confirmé : Patient confirme\n(SMS/Email)
+    Planifié --> Annulé : Annulation\n(patient ou cabinet)
+    Planifié --> Reporté : Demande de report
+
+    Confirmé --> EnAttente : Patient arrivé\n(check-in)
+    Confirmé --> Annulé : Annulation tardive
+    Confirmé --> NoShow : Patient absent\n(après 15min)
+    Confirmé --> Reporté : Report de dernière minute
+
+    Reporté --> Planifié : Nouveau créneau choisi
+
+    EnAttente --> EnCours : Praticien disponible\n(début consultation)
+
+    EnCours --> Terminé : Consultation terminée\n(actes enregistrés)
+
+    Terminé --> [*]
+    Annulé --> [*]
+    NoShow --> [*]
+
+    Planifié : entry / Envoyer confirmation
+    Planifié : entry / Planifier rappel J-1
+    Confirmé : entry / Mettre à jour calendrier
+    EnAttente : entry / Démarrer chrono attente
+    EnCours : entry / Bloquer créneau praticien
+    Terminé : entry / Générer facture
+    Terminé : entry / Planifier prochain RDV
+    NoShow : entry / Enregistrer absence
+    NoShow : entry / Envoyer notification patient
+    Annulé : entry / Libérer créneau
+    Annulé : entry / Notifier patient
+    Reporté : entry / Proposer créneaux alternatifs
+}
+
+' ============================================================
+' DIAGRAM 2: États d'un Examen Clinique
+' ============================================================
+
+newpage États d'un Examen Clinique
+
+state "Examen Clinique" as exam {
+    [*] --> Brouillon : Nouvel examen créé
+
+    Brouillon --> EnCours : Début de saisie\n(première réponse)
+
+    state EnCours {
+        [*] --> Interrogatoire
+        Interrogatoire --> PathologiesORL : Section complétée
+        PathologiesORL --> Parafonctions : Section complétée
+        Parafonctions --> Dysfonctions : Section complétée
+        Dysfonctions --> ExamenATM : Section complétée
+        ExamenATM --> ExamenDentaire : Section complétée
+        ExamenDentaire --> ExamensComplementaires : Section complétée
+        ExamensComplementaires --> SyntheseDiagnostique : Section complétée
+        SyntheseDiagnostique --> [*]
+    }
+
+    EnCours --> Brouillon : Sauvegarde partielle\n(quitter sans terminer)
+    EnCours --> Termine : Toutes sections complétées\n+ Cliquer "Enregistrer"
+
+    Termine --> Valide : Praticien valide\n(signature numérique)
+    Termine --> EnCours : Corrections nécessaires
+
+    Valide --> Archive : Après 5 ans\n(archivage automatique)
+
+    Valide --> [*]
+    Archive --> [*]
+
+    Brouillon : entry / Initialiser formulaire vide
+    Brouillon : do / Auto-save toutes les 30s
+    Termine : entry / Calculer score complétude
+    Termine : entry / Lancer analyse IA (async)
+    Valide : entry / Horodater validation
+    Valide : entry / Verrouiller modifications
+    Valide : entry / Générer PDF
+    Archive : entry / Compresser données
+    Archive : entry / Déplacer vers stockage froid
+}
+
+' ============================================================
+' DIAGRAM 3: États d'un Plan de Traitement
+' ============================================================
+
+newpage États d'un Plan de Traitement
+
+state "Plan de Traitement" as trt {
+    [*] --> Proposé : Création du plan\n(manuel ou IA)
+
+    Proposé --> EnDiscussion : Présentation au patient
+    Proposé --> Abandonné : Praticien annule
+
+    EnDiscussion --> Accepté : Patient accepte\n(signature consentement)
+    EnDiscussion --> Modifié : Ajustements demandés
+    EnDiscussion --> Refusé : Patient refuse
+
+    Modifié --> EnDiscussion : Nouvelle version présentée
+    Modifié --> Abandonné : Trop de modifications
+
+    Accepté --> Actif : Premier RDV de traitement\nréalisé
+
+    state Actif {
+        [*] --> PhaseInitiale
+        PhaseInitiale --> PhaseCorrection : Objectifs phase 1 atteints
+        PhaseCorrection --> PhaseFinition : Correction majeure terminée
+        PhaseFinition --> PhaseContention : Alignement optimal atteint
+        PhaseContention --> [*]
+
+        state "Surveillance" as surv {
+            PhaseInitiale : do / Contrôle mensuel
+            PhaseCorrection : do / Contrôle bi-mensuel
+            PhaseFinition : do / Contrôle mensuel
+            PhaseContention : do / Contrôle trimestriel
+        }
+    }
+
+    Actif --> Suspendu : Problème détecté\n(non-compliance, déménagement)
+    Actif --> Ajusté : IA détecte déviation\n(ajustement plan)
+
+    Ajusté --> Actif : Nouveau plan validé
+
+    Suspendu --> Actif : Reprise du traitement
+    Suspendu --> Abandonné : Abandon définitif
+
+    Actif --> Terminé : Toutes phases complétées\n+ Objectifs atteints
+
+    Terminé --> SuiviPostTraitement : Début période de rétention
+
+    SuiviPostTraitement --> Cloturé : Fin de suivi\n(stabilité confirmée)
+
+    Refusé --> [*]
+    Abandonné --> [*]
+    Cloturé --> [*]
+
+    Proposé : entry / Générer devis
+    Proposé : entry / Estimer durée (IA)
+    Accepté : entry / Enregistrer consentement
+    Accepté : entry / Planifier premiers RDV
+    Actif : do / Surveillance IA continue
+    Actif : do / Détection problèmes
+    Suspendu : entry / Notifier patient
+    Suspendu : entry / Geler facturation
+    Terminé : entry / Générer rapport final
+    Terminé : entry / Photos finales
+    Terminé : entry / Calcul succès traitement
+    SuiviPostTraitement : do / Rappels port contention
+    Cloturé : entry / Archiver dossier
+}
+
+' ============================================================
+' DIAGRAM 4: États d'une Facture
+' ============================================================
+
+newpage États d'une Facture
+
+state "Facture" as fact {
+    [*] --> Brouillon : Création facture
+
+    Brouillon --> Validée : Validation par secrétaire
+    Brouillon --> Annulée : Suppression brouillon
+
+    Validée --> Envoyée : Envoi au patient\n(email/courrier)
+    Validée --> Télétransmise : Envoi FSE\n(SESAM-Vitale)
+
+    Envoyée --> Télétransmise : Télétransmission\naprès envoi patient
+
+    Télétransmise --> EnAttenteRemboursement : FSE acceptée\npar la CPAM
+
+    Télétransmise --> Rejetée : FSE rejetée\n(erreur données)
+    Rejetée --> Brouillon : Correction et\nresoumission
+
+    EnAttenteRemboursement --> PartiellementPayée : Remboursement CPAM reçu\n(reste à charge patient)
+
+    PartiellementPayée --> Payée : Paiement patient reçu\n(solde = 0)
+
+    Envoyée --> PartiellementPayée : Paiement partiel reçu
+    Envoyée --> Payée : Paiement total reçu
+    Envoyée --> EnRetard : Délai dépassé (30j)
+
+    EnRetard --> PartiellementPayée : Paiement partiel
+    EnRetard --> Payée : Paiement total
+    EnRetard --> ContentieuxAmiable : Relance envoyée\n(2ème rappel)
+
+    ContentieuxAmiable --> Payée : Paiement reçu
+    ContentieuxAmiable --> Irrécouvrable : Échec recouvrement\n(après 90j)
+
+    Payée --> [*]
+    Annulée --> [*]
+    Irrécouvrable --> [*]
+
+    Brouillon : entry / Calculer montants
+    Brouillon : do / Auto-save
+    Validée : entry / Attribuer numéro facture
+    Validée : entry / Verrouiller montants
+    Envoyée : entry / Envoyer email/SMS patient
+    Envoyée : entry / Démarrer délai paiement
+    Télétransmise : entry / Envoyer FSE CPAM
+    Télétransmise : entry / Log télétransmission
+    EnAttenteRemboursement : do / Vérifier statut CPAM
+    PartiellementPayée : entry / Enregistrer paiement
+    PartiellementPayée : entry / Calculer solde restant
+    Payée : entry / Générer reçu
+    Payée : entry / Clôturer facture
+    EnRetard : entry / Envoyer rappel automatique
+    ContentieuxAmiable : entry / Envoyer mise en demeure
+    Irrécouvrable : entry / Passer en perte
+    Annulée : entry / Générer avoir
+}
+
+' ============================================================
+' DIAGRAM 5: États d'une Demande de Congé
+' ============================================================
+
+newpage États d'une Demande de Congé
+
+state "Demande de Congé" as conge {
+    [*] --> Brouillon : Employé crée demande
+
+    Brouillon --> Soumise : Employé soumet\nla demande
+
+    Soumise --> EnValidation : Manager notifié
+
+    EnValidation --> Approuvée : Manager approuve
+    EnValidation --> Refusée : Manager refuse\n(motif obligatoire)
+    EnValidation --> DemandeModification : Manager demande\nmodification dates
+
+    DemandeModification --> Soumise : Employé modifie\net resoumet
+    DemandeModification --> Annulée : Employé annule
+
+    Approuvée --> EnCours : Date de début atteinte
+
+    EnCours --> Terminée : Date de fin atteinte
+
+    Approuvée --> Annulée : Employé annule\n(avant date début)
+
+    Terminée --> [*]
+    Refusée --> [*]
+    Annulée --> [*]
+
+    Brouillon : do / Vérifier solde suffisant
+    Brouillon : do / Détecter conflits équipe
+    Soumise : entry / Notifier manager
+    Soumise : entry / Bloquer dates provisoirement
+    EnValidation : do / Afficher dans dashboard manager
+    Approuvée : entry / Déduire du solde congés
+    Approuvée : entry / Notifier employé
+    Approuvée : entry / Mettre à jour planning équipe
+    Refusée : entry / Notifier employé + motif
+    Refusée : entry / Libérer dates
+    EnCours : entry / Marquer absent dans planning
+    Terminée : entry / Mettre à jour compteurs
+    Annulée : entry / Recréditer solde congés
+    Annulée : entry / Libérer dates planning
+}
+
+' ============================================================
+' DIAGRAM 6: États d'une Analyse IA
+' ============================================================
+
+newpage États d'une Analyse IA
+
+state "Analyse IA" as ia {
+    [*] --> Initiée : Praticien lance analyse
+
+    Initiée --> CollecteEnCours : Récupération données patient
+
+    CollecteEnCours --> DonnéesComplètes : Toutes données\nrécupérées
+    CollecteEnCours --> DonnéesIncomplètes : Données manquantes\ndétectées
+
+    DonnéesIncomplètes --> Initiée : Praticien complète\nles données manquantes
+
+    DonnéesComplètes --> AnalyseEnCours : Envoi au modèle ML
+
+    state AnalyseEnCours {
+        [*] --> Classification
+        Classification --> ÉvaluationComplexité
+        ÉvaluationComplexité --> PrédictionDurée
+        PrédictionDurée --> IdentificationRisques
+        IdentificationRisques --> GénérationRecommandations
+        GénérationRecommandations --> [*]
+    }
+
+    AnalyseEnCours --> Échouée : Erreur modèle ML\n(timeout, données invalides)
+
+    AnalyseEnCours --> Terminée : Analyse complète\n(confiance > 70%)
+
+    AnalyseEnCours --> ConfianceFaible : Analyse complète\n(confiance < 70%)
+
+    ConfianceFaible --> Terminée : Praticien valide\nmanuellement
+
+    Terminée --> Consultée : Praticien consulte\nles résultats
+
+    Consultée --> Appliquée : Praticien applique\nrecommandation au plan
+
+    Consultée --> Rejetée : Praticien rejette\n(feedback pour ML)
+
+    Échouée --> Initiée : Relancer analyse
+
+    Appliquée --> [*]
+    Rejetée --> [*]
+
+    Initiée : entry / Créer session analyse
+    CollecteEnCours : do / Récupérer examens, photos, mesures
+    AnalyseEnCours : do / Afficher barre de progression
+    AnalyseEnCours : do / Estimation temps restant
+    Terminée : entry / Stocker résultats
+    Terminée : entry / Calculer score confiance
+    Terminée : entry / Notifier praticien
+    Consultée : entry / Logger consultation
+    Appliquée : entry / Mettre à jour plan traitement
+    Appliquée : entry / Feedback positif au modèle
+    Rejetée : entry / Feedback négatif au modèle
+    Rejetée : entry / Logger motif rejet
+    Échouée : entry / Logger erreur
+    Échouée : entry / Notifier support technique
+}
+
+' ============================================================
+' DIAGRAM 7: États d'un Matériau en Stock
+' ============================================================
+
+newpage États d'un Matériau en Stock
+
+state "Matériau en Stock" as stock {
+    [*] --> Créé : Ajout au catalogue
+
+    Créé --> Disponible : Stock initial\nenregistré
+
+    Disponible --> StockBas : Quantité < seuil minimum
+
+    StockBas --> CommandeEnCours : Bon de commande\ngénéré
+
+    CommandeEnCours --> Disponible : Livraison reçue\n(stock reconstitué)
+    CommandeEnCours --> StockBas : Livraison partielle
+
+    Disponible --> Réservé : Réservé pour\nun traitement
+
+    Réservé --> Utilisé : Consommé lors\ndu traitement
+
+    Réservé --> Disponible : Réservation annulée
+
+    Utilisé --> Disponible : Stock restant > seuil
+
+    Utilisé --> StockBas : Stock restant < seuil
+
+    StockBas --> Rupture : Quantité = 0
+
+    Rupture --> CommandeEnCours : Commande urgente\ngénérée
+
+    Disponible --> Périmé : Date expiration\ndépassée
+
+    Périmé --> Éliminé : Retrait du stock
+
+    Éliminé --> [*]
+
+    Disponible : entry / Indicateur vert
+    StockBas : entry / Indicateur orange
+    StockBas : entry / Alerter gestionnaire
+    Rupture : entry / Indicateur rouge
+    Rupture : entry / Alerte critique
+    Rupture : entry / Bloquer réservations
+    CommandeEnCours : entry / Envoyer commande fournisseur
+    CommandeEnCours : do / Suivre livraison
+    Réservé : entry / Décrémenter stock disponible
+    Utilisé : entry / Enregistrer mouvement sortie
+    Utilisé : entry / Lier au dossier patient
+    Périmé : entry / Alerter gestionnaire
+    Périmé : entry / Bloquer utilisation
+    Éliminé : entry / Enregistrer destruction
+    Éliminé : entry / Mettre à jour inventaire
+}
+
+@enduml

@@ -1,0 +1,438 @@
+@startuml ExamenClinique_ERD
+
+!define TABLE(name) class name << (T,#FFAAAA) >>
+!define PK(x) <b><color:#b8860b><&key></color> x</b>
+!define FK(x) <color:#aaaaaa><&link-intact></color> x
+!define UNIQUE(x) <color:#green><&check></color> x
+!define INDEX(x) <color:#blue><&list></color> x
+!define NULLABLE(x) <color:#gray>x</color>
+
+title Examen Clinique - Entity Relationship Diagram (ERD)\nOptimized for Performance & Scalability
+
+skinparam class {
+    BackgroundColor White
+    BorderColor #2C3E50
+    ArrowColor #2C3E50
+}
+
+skinparam stereotypeCBackgroundColor #E8F6F3
+skinparam stereotypeCBorderColor #1ABC9C
+
+' ==========================================
+' CORE ENTITIES
+' ==========================================
+
+package "Core Entities" #E8F8F5 {
+    
+    TABLE(Patient) {
+        PK(id) : UUID
+        --
+        INDEX(code_patient) : VARCHAR(20)
+        nom : VARCHAR(100)
+        prenom : VARCHAR(100)
+        date_naissance : DATE
+        sexe : ENUM('M','F','O')
+        telephone : VARCHAR(20)
+        email : VARCHAR(255)
+        adresse : TEXT
+        --
+        created_at : TIMESTAMP
+        updated_at : TIMESTAMP
+        INDEX(is_active) : BOOLEAN
+    }
+    
+    TABLE(Praticien) {
+        PK(id) : UUID
+        --
+        INDEX(code_praticien) : VARCHAR(20)
+        nom : VARCHAR(100)
+        prenom : VARCHAR(100)
+        specialite : VARCHAR(100)
+        --
+        created_at : TIMESTAMP
+        is_active : BOOLEAN
+    }
+}
+
+' ==========================================
+' EXAMINATION ENTITIES
+' ==========================================
+
+package "Examination Module" #FEF9E7 {
+    
+    TABLE(ExamenClinique) {
+        PK(id) : UUID
+        --
+        FK(patient_id) : UUID
+        FK(praticien_id) : UUID
+        --
+        INDEX(date_examen) : TIMESTAMP
+        INDEX(statut) : ENUM('brouillon','en_cours','termine','valide')
+        numero_examen : VARCHAR(20)
+        --
+        ' Denormalized summary for quick access
+        diagnostic_principal : TEXT
+        observations : TEXT
+        objectifs_therapeutiques : TEXT
+        --
+        created_at : TIMESTAMP
+        updated_at : TIMESTAMP
+        validated_at : NULLABLE(TIMESTAMP)
+        FK(validated_by) : NULLABLE(UUID)
+    }
+    
+    note right of ExamenClinique
+        **Performance Optimizations:**
+        - Composite index on (patient_id, date_examen DESC)
+        - Partial index on statut = 'en_cours'
+        - Summary fields denormalized for list views
+    end note
+}
+
+' ==========================================
+' TEMPLATE SYSTEM (Generic & Reusable)
+' ==========================================
+
+package "Template System" #F4ECF7 {
+    
+    TABLE(SectionTemplate) {
+        PK(id) : UUID
+        --
+        INDEX(code) : VARCHAR(50)
+        nom : VARCHAR(100)
+        description : TEXT
+        INDEX(ordre) : INTEGER
+        couleur : VARCHAR(7)
+        icone : VARCHAR(50)
+        --
+        is_active : BOOLEAN
+        created_at : TIMESTAMP
+    }
+    
+    note right of SectionTemplate
+        **Predefined Sections:**
+        - motif_consultation
+        - pathologies_orl
+        - parafonctions
+        - dysfonctions
+        - examen_atm
+        - examen_dentaire
+        - diagnostic_squelettique
+        - diagnostic_dentaire
+        - tissus_mous
+    end note
+    
+    TABLE(QuestionTemplate) {
+        PK(id) : UUID
+        --
+        FK(section_id) : UUID
+        --
+        INDEX(code) : VARCHAR(50)
+        libelle : VARCHAR(255)
+        description : NULLABLE(TEXT)
+        INDEX(type_reponse) : ENUM('boolean','single_choice','multi_choice','text','number','date','teeth_selection')
+        INDEX(ordre) : INTEGER
+        --
+        ' For choice-based questions
+        options_json : NULLABLE(JSONB)
+        --
+        ' Validation rules
+        is_required : BOOLEAN
+        validation_rules : NULLABLE(JSONB)
+        --
+        ' Conditional display
+        condition_json : NULLABLE(JSONB)
+        --
+        is_active : BOOLEAN
+        created_at : TIMESTAMP
+    }
+    
+    note right of QuestionTemplate
+        **options_json example:**
+        {
+            "choices": [
+                {"value": "nasale", "label": "Nasale"},
+                {"value": "mixte", "label": "Mixte"},
+                {"value": "buccale", "label": "Buccale"}
+            ]
+        }
+        
+        **condition_json example:**
+        {
+            "depends_on": "question_code",
+            "operator": "equals",
+            "value": true
+        }
+    end note
+    
+    TABLE(QuestionGroup) {
+        PK(id) : UUID
+        --
+        FK(section_id) : UUID
+        --
+        code : VARCHAR(50)
+        nom : VARCHAR(100)
+        INDEX(ordre) : INTEGER
+        --
+        is_active : BOOLEAN
+    }
+    
+    note right of QuestionGroup
+        **Groups within sections:**
+        - "Ventilation" in pathologies_orl
+        - "Succion" in parafonctions
+        - "Douleurs" in examen_atm
+    end note
+}
+
+' ==========================================
+' ANSWER STORAGE (EAV Pattern Optimized)
+' ==========================================
+
+package "Answer Storage" #FDEDEC {
+    
+    TABLE(ExamenSection) {
+        PK(id) : UUID
+        --
+        FK(examen_id) : UUID
+        FK(section_template_id) : UUID
+        --
+        INDEX(statut) : ENUM('non_commence','en_cours','termine')
+        completed_at : NULLABLE(TIMESTAMP)
+        --
+        ' Denormalized JSON for fast reads
+        ' Contains all answers for this section
+        answers_snapshot : NULLABLE(JSONB)
+        --
+        created_at : TIMESTAMP
+        updated_at : TIMESTAMP
+    }
+    
+    note right of ExamenSection
+        **answers_snapshot example:**
+        {
+            "ventilation_nasale": true,
+            "ventilation_mixte": false,
+            "allergies": "Pénicilline",
+            "selected_teeth": [11,12,21,22]
+        }
+        
+        **Benefits:**
+        - Single read for entire section
+        - Fast list/summary views
+        - Reduced JOIN complexity
+    end note
+    
+    TABLE(ReponseExamen) {
+        PK(id) : UUID
+        --
+        FK(examen_section_id) : UUID
+        FK(question_template_id) : UUID
+        --
+        ' Polymorphic value storage
+        valeur_boolean : NULLABLE(BOOLEAN)
+        valeur_text : NULLABLE(TEXT)
+        valeur_number : NULLABLE(DECIMAL(10,2))
+        valeur_date : NULLABLE(DATE)
+        valeur_json : NULLABLE(JSONB)
+        --
+        ' For audit trail
+        created_at : TIMESTAMP
+        updated_at : TIMESTAMP
+        FK(modified_by) : NULLABLE(UUID)
+    }
+    
+    note right of ReponseExamen
+        **valeur_json examples:**
+        
+        Multi-choice:
+        ["nasale", "mixte"]
+        
+        Teeth selection:
+        {"selected": [11,12,21,22], "type": "permanent"}
+        
+        Complex answer:
+        {"droite": true, "gauche": false, "notes": "..."}
+    end note
+}
+
+' ==========================================
+' DENTAL SPECIFIC
+' ==========================================
+
+package "Dental Specific" #E8DAEF {
+    
+    TABLE(ExamenDentaire) {
+        PK(id) : UUID
+        --
+        FK(examen_id) : UUID
+        --
+        ' Teeth selections stored as arrays
+        dents_selectionnees : INTEGER[]
+        dents_incluses : INTEGER[]
+        --
+        ' Quick access fields
+        age_dentaire : ENUM('precoce','normal','retarde')
+        mih : BOOLEAN
+        --
+        ' Text observations
+        dents_couronnees : TEXT
+        caries : TEXT
+        implants : TEXT
+        dents_absentes : TEXT
+        facettes_usure : TEXT
+        fractures : TEXT
+        dyschromie : TEXT
+        --
+        ' Contacts
+        contact_lateral_droite : TEXT
+        contact_propulsion : TEXT
+        contact_lateral_gauche : TEXT
+        --
+        created_at : TIMESTAMP
+        updated_at : TIMESTAMP
+    }
+    
+    note right of ExamenDentaire
+        **Separate table for dental exam:**
+        - Teeth arrays use PostgreSQL native arrays
+        - GIN index for fast array queries
+        - Avoids EAV overhead for complex dental data
+    end note
+    
+    TABLE(MesureCephalometrique) {
+        PK(id) : UUID
+        --
+        FK(examen_id) : UUID
+        --
+        ' Vertical measurements
+        fma : NULLABLE(DECIMAL(5,2))
+        impa : NULLABLE(DECIMAL(5,2))
+        axe_y : NULLABLE(DECIMAL(5,2))
+        --
+        ' Sagittal measurements
+        anb : NULLABLE(DECIMAL(5,2))
+        sna : NULLABLE(DECIMAL(5,2))
+        snb : NULLABLE(DECIMAL(5,2))
+        convexite_faciale : NULLABLE(DECIMAL(5,2))
+        --
+        ' Transversal measurements
+        largeur_maxillaire : NULLABLE(DECIMAL(5,2))
+        largeur_mandibulaire : NULLABLE(DECIMAL(5,2))
+        symetrie : ENUM('symetrique','deviation_droite','deviation_gauche')
+        --
+        ' Dental measurements
+        surplomb : NULLABLE(DECIMAL(5,2))
+        recouvrement : NULLABLE(DECIMAL(5,2))
+        encombrement_sup : NULLABLE(DECIMAL(5,2))
+        encombrement_inf : NULLABLE(DECIMAL(5,2))
+        --
+        ' Classifications
+        classe_molaire_droite : ENUM('I','II','III')
+        classe_molaire_gauche : ENUM('I','II','III')
+        classe_canine : ENUM('I','II','III')
+        --
+        created_at : TIMESTAMP
+        updated_at : TIMESTAMP
+    }
+    
+    note right of MesureCephalometrique
+        **Dedicated table for measurements:**
+        - Typed columns for validation
+        - Easy statistical analysis
+        - Direct comparison with norms
+    end note
+}
+
+' ==========================================
+' ATTACHMENTS & MEDIA
+' ==========================================
+
+package "Attachments" #D5F5E3 {
+    
+    TABLE(ExamenAttachment) {
+        PK(id) : UUID
+        --
+        FK(examen_id) : UUID
+        FK(section_id) : NULLABLE(UUID)
+        --
+        type : ENUM('photo','radiographie','document','autre')
+        nom_fichier : VARCHAR(255)
+        chemin_stockage : VARCHAR(500)
+        mime_type : VARCHAR(100)
+        taille_octets : BIGINT
+        --
+        description : NULLABLE(TEXT)
+        INDEX(ordre) : INTEGER
+        --
+        created_at : TIMESTAMP
+        FK(uploaded_by) : UUID
+    }
+}
+
+' ==========================================
+' AUDIT & HISTORY
+' ==========================================
+
+package "Audit Trail" #FDEBD0 {
+    
+    TABLE(ExamenHistorique) {
+        PK(id) : UUID
+        --
+        FK(examen_id) : UUID
+        FK(user_id) : UUID
+        --
+        INDEX(action) : ENUM('creation','modification','validation','suppression')
+        INDEX(timestamp) : TIMESTAMP
+        --
+        ' Store diff or snapshot
+        donnees_avant : NULLABLE(JSONB)
+        donnees_apres : NULLABLE(JSONB)
+        --
+        ip_address : VARCHAR(45)
+        user_agent : TEXT
+    }
+    
+    note right of ExamenHistorique
+        **Audit benefits:**
+        - Complete change history
+        - RGPD compliance
+        - Rollback capability
+        - Legal protection
+    end note
+}
+
+' ==========================================
+' RELATIONSHIPS
+' ==========================================
+
+' Core relationships
+Patient "1" -- "0..*" ExamenClinique : has >
+Praticien "1" -- "0..*" ExamenClinique : performs >
+
+' Template relationships
+SectionTemplate "1" -- "0..*" QuestionTemplate : contains >
+SectionTemplate "1" -- "0..*" QuestionGroup : has >
+QuestionGroup "1" -- "0..*" QuestionTemplate : groups >
+
+' Examination structure
+ExamenClinique "1" -- "0..*" ExamenSection : has >
+ExamenSection "0..*" -- "1" SectionTemplate : uses >
+ExamenSection "1" -- "0..*" ReponseExamen : contains >
+ReponseExamen "0..*" -- "1" QuestionTemplate : answers >
+
+' Dental specific
+ExamenClinique "1" -- "0..1" ExamenDentaire : has >
+ExamenClinique "1" -- "0..1" MesureCephalometrique : has >
+
+' Attachments
+ExamenClinique "1" -- "0..*" ExamenAttachment : has >
+ExamenSection "1" -- "0..*" ExamenAttachment : may have >
+
+' Audit
+ExamenClinique "1" -- "0..*" ExamenHistorique : tracked by >
+
+' Validation
+Praticien "1" -- "0..*" ExamenClinique : validates >
+
+@enduml

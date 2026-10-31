@@ -1,0 +1,755 @@
+@startuml HealthPilot_Activity_Diagrams
+
+title HealthPilot - Diagrammes d'Activités
+
+' ============================================================
+' DIAGRAM 1: Parcours Patient Complet (Première Visite → Fin Traitement)
+' ============================================================
+
+|Secrétaire|
+start
+:Réception appel / visite patient;
+:Vérifier si patient existant;
+
+if (Patient existant ?) then (non)
+    :Créer fiche patient;
+    :Saisir informations personnelles;
+    :Saisir antécédents médicaux;
+    :Scanner documents\n(carte identité, carte vitale);
+    :Enregistrer informations assurance;
+else (oui)
+    :Ouvrir fiche patient existante;
+    :Vérifier informations à jour;
+    if (Mise à jour nécessaire ?) then (oui)
+        :Mettre à jour informations;
+    else (non)
+    endif
+endif
+
+:Rechercher créneau disponible;
+:Créer rendez-vous;
+:Envoyer confirmation SMS/Email;
+
+|Patient|
+:Recevoir confirmation;
+:Se présenter au cabinet;
+
+|Secrétaire|
+:Enregistrer arrivée patient;
+:Notifier praticien;
+
+|Orthodontiste|
+:Accueillir patient;
+:Réaliser examen clinique;
+
+fork
+    :Interrogatoire\n(motif, ORL, parafonctions);
+fork again
+    :Examen dentaire\n(schéma dentaire interactif);
+fork again
+    :Examen ATM\n(douleurs, bruits, palpation);
+end fork
+
+:Prescrire examens complémentaires;
+
+if (Radiographies nécessaires ?) then (oui)
+    :Réaliser panoramique / téléradiographie;
+    :Uploader images dans le système;
+    
+    |Système IA|
+    :Analyser images automatiquement;
+    :Détecter anomalies;
+    :Calculer mesures céphalométriques;
+    
+    |Orthodontiste|
+    :Consulter résultats analyse IA;
+    :Valider ou corriger mesures;
+else (non)
+endif
+
+:Saisir mesures céphalométriques;
+:Rédiger synthèse diagnostique;
+:Enregistrer examen clinique;
+
+|Système IA|
+:Lancer analyse ML du cas;
+:Classifier le cas (Classe I, II, III);
+:Évaluer complexité;
+:Générer 3-5 plans de traitement;
+:Calculer taux de réussite par plan;
+:Estimer durée de traitement;
+
+|Orthodontiste|
+:Consulter recommandations IA;
+:Sélectionner plan de traitement;
+:Personnaliser le plan si nécessaire;
+:Présenter options au patient;
+
+|Patient|
+:Écouter explications;
+:Poser questions;
+
+if (Patient accepte le plan ?) then (oui)
+    :Signer consentement éclairé;
+    
+    |Secrétaire|
+    :Générer devis;
+    :Proposer plan de paiement;
+    
+    |Patient|
+    if (Plan de paiement ?) then (oui)
+        :Choisir modalités de paiement;
+        |Secrétaire|
+        :Créer plan de paiement échelonné;
+    else (non)
+        |Secrétaire|
+        :Enregistrer paiement comptant;
+    endif
+    
+    :Planifier premiers rendez-vous;
+    :Envoyer récapitulatif au patient;
+    
+    |Orthodontiste|
+    :Démarrer traitement;
+    
+    repeat
+        :Réaliser séance de traitement;
+        :Enregistrer actes réalisés;
+        :Prendre photos de progression;
+        :Mettre à jour suivi;
+        
+        |Système IA|
+        :Analyser progression;
+        :Comparer avec plan prévu;
+        
+        if (Problème détecté ?) then (oui)
+            :Générer alerte;
+            |Orthodontiste|
+            :Consulter alerte;
+            :Ajuster plan si nécessaire;
+        else (non)
+        endif
+        
+        |Secrétaire|
+        :Facturer la séance;
+        :Planifier prochain RDV;
+        :Envoyer rappel automatique;
+        
+    repeat while (Traitement terminé ?) is (non)
+    -> oui;
+    
+    |Orthodontiste|
+    :Prendre photos finales;
+    :Comparer avant/après;
+    :Rédiger rapport de fin de traitement;
+    :Poser contention;
+    
+    |Secrétaire|
+    :Générer facture finale;
+    :Planifier RDV de suivi post-traitement;
+    
+    |Patient|
+    :Recevoir rapport final;
+    
+else (non)
+    |Orthodontiste|
+    :Documenter refus;
+    |Secrétaire|
+    :Archiver dossier;
+endif
+
+stop
+
+' ============================================================
+' DIAGRAM 2: Processus de Facturation & Remboursement
+' ============================================================
+
+newpage Activité 2 - Processus de Facturation & Remboursement
+
+|Secrétaire|
+start
+:Ouvrir module Administration;
+:Sélectionner patient;
+:Consulter actes réalisés non facturés;
+
+:Créer nouvelle facture;
+:Sélectionner actes à facturer;
+:Appliquer tarifs conventionnels;
+
+if (Dépassement d'honoraires ?) then (oui)
+    :Saisir montant dépassement;
+    :Justifier dépassement;
+else (non)
+endif
+
+:Calculer montants\n(base + dépassement + TVA);
+:Vérifier totaux;
+:Valider facture;
+
+fork
+    |SESAM-Vitale|
+    :Préparer FSE;
+    :Insérer carte Vitale patient;
+    :Lire données carte;
+    :Remplir FSE automatiquement;
+    :Signer électroniquement;
+    :Télétransmettre à la CPAM;
+    
+    if (FSE acceptée ?) then (oui)
+        :Enregistrer accusé de réception;
+        
+        |CPAM / Mutuelle|
+        :Traiter la FSE;
+        :Calculer remboursement;
+        :Virer remboursement;
+        
+        |Secrétaire|
+        :Enregistrer remboursement reçu;
+        :Calculer reste à charge patient;
+    else (non)
+        |Secrétaire|
+        :Analyser motif de rejet;
+        :Corriger FSE;
+        :Retélétransmettre;
+    endif
+    
+fork again
+    |Secrétaire|
+    :Envoyer facture au patient\n(email ou courrier);
+end fork
+
+|Secrétaire|
+:Calculer solde patient;
+
+if (Reste à charge > 0 ?) then (oui)
+    :Envoyer demande de paiement;
+    
+    if (Paiement en ligne ?) then (oui)
+        :Générer lien de paiement;
+        :Envoyer lien par SMS/Email;
+        
+        |Patient|
+        :Recevoir lien;
+        :Accéder à la page de paiement;
+        :Saisir informations carte;
+        
+        |Passerelle Paiement|
+        :Traiter transaction;
+        
+        if (Paiement accepté ?) then (oui)
+            :Confirmer paiement;
+            |Secrétaire|
+            :Enregistrer paiement;
+            :Générer reçu;
+            :Envoyer reçu au patient;
+        else (non)
+            |Patient|
+            :Recevoir notification échec;
+            :Réessayer ou choisir autre moyen;
+        endif
+    else (non)
+        |Patient|
+        :Payer au cabinet\n(CB, espèces, chèque);
+        |Secrétaire|
+        :Encaisser paiement;
+        :Générer reçu;
+    endif
+else (non)
+    :Facture soldée\n(100% remboursé);
+endif
+
+:Mettre à jour comptabilité;
+:Clôturer facture;
+
+stop
+
+' ============================================================
+' DIAGRAM 3: Analyse IA & Détection de Problèmes
+' ============================================================
+
+newpage Activité 3 - Analyse IA & Détection de Problèmes
+
+|Orthodontiste|
+start
+:Accéder aux Outils IA;
+:Sélectionner patient;
+
+|Système|
+:Récupérer dossier complet patient;
+
+fork
+    :Charger examens cliniques;
+fork again
+    :Charger photos et radiographies;
+fork again
+    :Charger mesures céphalométriques;
+fork again
+    :Charger historique traitements;
+end fork
+
+|Moteur ML|
+:Recevoir données patient;
+
+if (Données suffisantes ?) then (oui)
+    
+    :Prétraitement des données;
+    :Normalisation des mesures;
+    
+    fork
+        :Classification du cas;
+        note right
+            Classe I, II div.1,
+            II div.2, III
+        end note
+    fork again
+        :Évaluation de la complexité;
+        note right
+            Simple, Modéré,
+            Complexe
+        end note
+    fork again
+        :Prédiction durée traitement;
+        note right
+            Min, Probable, Max
+            avec intervalle confiance
+        end note
+    fork again
+        :Identification facteurs de risque;
+        note right
+            Non-compliance,
+            Croissance, Récidive
+        end note
+    end fork
+    
+    :Calculer score de confiance global;
+    
+    if (Confiance >= 80% ?) then (oui)
+        :Résultats haute confiance;
+    else if (Confiance >= 60% ?) then (partiel)
+        :Résultats confiance moyenne;
+        :Marquer pour revue humaine;
+    else (non)
+        :Résultats faible confiance;
+        :Alerter praticien;
+    endif
+    
+    :Rechercher cas similaires\n(base de 10 000+ cas);
+    :Sélectionner 3-5 cas les plus proches;
+    
+    :Générer recommandations de traitement;
+    
+    fork
+        :Plan 1: Appareil fixe\n(taux succès: 89%);
+    fork again
+        :Plan 2: Aligneurs\n(taux succès: 85%);
+    fork again
+        :Plan 3: Approche mixte\n(taux succès: 91%);
+    end fork
+    
+    :Calculer coût estimé par plan;
+    :Estimer durée par plan;
+    :Lister avantages/inconvénients;
+    
+    |Orthodontiste|
+    :Consulter résultats analyse;
+    :Examiner recommandations;
+    :Comparer les plans proposés;
+    
+    if (Accepter une recommandation ?) then (oui)
+        :Sélectionner plan recommandé;
+        :Personnaliser si nécessaire;
+        :Appliquer au dossier patient;
+        
+        |Système|
+        :Créer plan de traitement;
+        :Activer surveillance IA;
+        :Feedback positif au modèle;
+    else (non)
+        :Créer plan manuellement;
+        |Système|
+        :Enregistrer feedback négatif;
+        :Améliorer modèle (apprentissage);
+    endif
+    
+else (non)
+    |Système|
+    :Lister données manquantes;
+    |Orthodontiste|
+    :Compléter les données;
+    :Relancer analyse;
+endif
+
+== Surveillance Continue ==
+
+|Système|
+:Activer détection de problèmes;
+
+repeat
+    :Comparer progression réelle vs prévue;
+    
+    if (Écart significatif ?) then (oui)
+        :Classifier le problème;
+        
+        if (Sévérité ?) then (haute)
+            :Alerte immédiate praticien;
+            :Proposer actions correctives;
+            
+            |Orthodontiste|
+            :Consulter alerte;
+            :Appliquer correction;
+            
+        else if (Sévérité ?) then (moyenne)
+            :Notification praticien;
+            :Ajouter à liste de suivi;
+        else (basse)
+            :Logger pour rapport mensuel;
+        endif
+    else (non)
+        :Progression normale;
+    endif
+    
+repeat while (Traitement en cours ?) is (oui)
+-> non;
+
+:Générer rapport final IA;
+
+stop
+
+' ============================================================
+' DIAGRAM 4: Gestion des Stocks & Réapprovisionnement
+' ============================================================
+
+newpage Activité 4 - Gestion des Stocks & Réapprovisionnement
+
+|Système|
+start
+:Vérification automatique quotidienne\ndes niveaux de stock;
+
+:Parcourir tous les matériaux;
+
+while (Matériau suivant ?) is (oui)
+    :Lire quantité actuelle;
+    :Lire seuil minimum;
+    
+    if (Quantité < Seuil ?) then (oui)
+        if (Quantité = 0 ?) then (oui)
+            :Créer alerte CRITIQUE\n(rupture de stock);
+            #red:Bloquer réservations\npour ce matériau;
+        else (non)
+            :Créer alerte WARNING\n(stock bas);
+        endif
+        
+        :Calculer quantité à commander\n(stock optimal - stock actuel);
+        :Identifier fournisseur préféré;
+        :Estimer délai livraison;
+    else (non)
+        :Stock suffisant ✅;
+    endif
+endwhile (non)
+
+:Envoyer résumé alertes;
+
+|Gestionnaire|
+:Recevoir notifications stock;
+:Consulter tableau de bord stock;
+
+if (Alertes critiques ?) then (oui)
+    :Traiter en priorité;
+else (non)
+endif
+
+:Consulter suggestions de commande;
+
+if (Approuver commande auto ?) then (oui)
+    :Valider commande suggérée;
+else (non)
+    :Ajuster quantités;
+    :Changer fournisseur si nécessaire;
+    :Valider commande modifiée;
+endif
+
+|Système|
+:Générer bon de commande;
+:Envoyer au fournisseur\n(email automatique);
+:Enregistrer commande\n(statut: envoyée);
+
+|Fournisseur|
+:Recevoir commande;
+:Préparer livraison;
+:Expédier matériaux;
+
+|Gestionnaire|
+:Recevoir livraison;
+:Vérifier contenu vs bon de commande;
+
+if (Livraison conforme ?) then (oui)
+    :Confirmer réception complète;
+    
+    |Système|
+    :Mettre à jour quantités stock;
+    :Enregistrer mouvement entrée;
+    :Mettre à jour commande\n(statut: reçue);
+    :Supprimer alertes résolues;
+    
+else if (Livraison partielle ?) then (partielle)
+    :Confirmer réception partielle;
+    :Lister articles manquants;
+    
+    |Système|
+    :Mettre à jour stock partiellement;
+    :Maintenir commande ouverte\npour articles manquants;
+    
+else (non conforme)
+    :Signaler problème qualité;
+    :Initier retour fournisseur;
+    
+    |Système|
+    :Enregistrer incident qualité;
+    :Mettre à jour score fournisseur;
+endif
+
+|Système|
+:Vérifier dates de péremption;
+
+if (Matériaux périmés ?) then (oui)
+    :Alerter gestionnaire;
+    |Gestionnaire|
+    :Retirer du stock;
+    :Enregistrer destruction;
+else (non)
+endif
+
+:Générer rapport stock mensuel;
+
+stop
+
+' ============================================================
+' DIAGRAM 5: Processus RH - Cycle de Vie Employé
+' ============================================================
+
+newpage Activité 5 - Gestion RH - Cycle Complet
+
+|Manager RH|
+start
+:Identifier besoin de recrutement;
+:Créer fiche de poste;
+
+|Candidat|
+:Postuler;
+
+|Manager RH|
+:Examiner candidatures;
+:Sélectionner candidat;
+:Réaliser entretien;
+
+if (Candidat retenu ?) then (oui)
+    :Préparer offre d'emploi;
+    
+    |Candidat|
+    if (Accepte offre ?) then (oui)
+        
+        |Manager RH|
+        :Créer fiche employé dans le système;
+        :Saisir informations personnelles;
+        :Définir poste et département;
+        :Attribuer rôle et permissions;
+        
+        :Créer contrat de travail;
+        :Définir conditions\n(salaire, horaires, avantages);
+        
+        |Nouvel Employé|
+        :Signer contrat;
+        
+        |Manager RH|
+        :Enregistrer contrat signé;
+        :Configurer accès système;
+        :Planifier formation initiale;
+        :Attribuer planning de travail;
+        
+        == Vie Courante ==
+        
+        fork
+            == Gestion des Congés ==
+            |Employé|
+            :Consulter solde congés;
+            :Soumettre demande de congé;
+            
+            |Manager RH|
+            :Recevoir notification;
+            :Vérifier couverture équipe;
+            
+            if (Approuver ?) then (oui)
+                :Approuver congé;
+                |Système|
+                :Déduire du solde;
+                :Mettre à jour planning;
+                :Notifier employé;
+            else (non)
+                :Refuser avec motif;
+                |Système|
+                :Notifier employé;
+            endif
+            
+        fork again
+            == Évaluations de Performance ==
+            |Manager RH|
+            :Planifier évaluation annuelle;
+            :Préparer grille d'évaluation;
+            :Réaliser entretien;
+            :Saisir évaluation dans le système;
+            :Définir objectifs prochaine période;
+            
+            |Employé|
+            :Consulter évaluation;
+            :Signer évaluation;
+            
+        fork again
+            == Suivi Quotidien ==
+            |Employé|
+            :Pointer arrivée/départ;
+            |Système|
+            :Enregistrer heures;
+            :Calculer heures supplémentaires;
+            :Mettre à jour compteurs;
+        end fork
+        
+        == Fin de Contrat ==
+        
+        |Manager RH|
+        if (Type de fin ?) then (démission)
+            |Employé|
+            :Soumettre démission;
+            |Manager RH|
+            :Enregistrer démission;
+            :Calculer préavis;
+        else if (Type de fin ?) then (fin CDD)
+            |Système|
+            :Alerter fin de contrat\n(30j avant);
+            |Manager RH|
+            if (Renouveler ?) then (oui)
+                :Créer nouveau contrat;
+            else (non)
+                :Préparer fin de contrat;
+            endif
+        else (licenciement)
+            |Manager RH|
+            :Documenter motifs;
+            :Suivre procédure légale;
+        endif
+        
+        :Réaliser solde de tout compte;
+        :Désactiver accès système;
+        :Archiver dossier employé;
+        
+    else (non)
+        |Manager RH|
+        :Archiver candidature;
+    endif
+else (non)
+    :Archiver candidature;
+endif
+
+stop
+
+' ============================================================
+' DIAGRAM 6: Processus d'Imagerie & Édition
+' ============================================================
+
+newpage Activité 6 - Imagerie Dentaire & Édition
+
+|Orthodontiste|
+start
+:Accéder au module Imagerie;
+
+if (Nouvelle image ?) then (oui)
+    :Capturer image\n(caméra intra-orale / scanner);
+    
+    |Système|
+    :Importer image;
+    :Détecter format\n(DICOM, PNG, JPG);
+    :Créer miniature;
+    :Associer au dossier patient;
+else (non)
+    :Sélectionner image existante;
+endif
+
+|Orthodontiste|
+:Ouvrir dans l'éditeur d'images;
+
+|Éditeur d'Images|
+:Charger image sur le canvas;
+:Initialiser outils;
+
+fork
+    == Ajustements ==
+    |Orthodontiste|
+    :Ajuster luminosité/contraste;
+    :Corriger niveaux;
+    :Ajuster courbes;
+    :Modifier balance des couleurs;
+fork again
+    == Annotations ==
+    |Orthodontiste|
+    :Ajouter annotations texte;
+    :Dessiner flèches/lignes;
+    :Marquer zones d'intérêt;
+    :Ajouter mesures\n(distances, angles);
+fork again
+    == Transformations ==
+    |Orthodontiste|
+    :Recadrer image;
+    :Rotation/retournement;
+    :Correction perspective;
+fork again
+    == Calques ==
+    |Orthodontiste|
+    :Créer nouveau calque;
+    :Dessiner sur calque séparé;
+    :Ajuster opacité;
+    :Choisir mode de fusion;
+end fork
+
+if (Analyse IA souhaitée ?) then (oui)
+    |Système IA|
+    :Analyser image;
+    
+    fork
+        :Détecter caries;
+    fork again
+        :Analyser densité osseuse;
+    fork again
+        :Identifier anomalies;
+    fork again
+        :Mesurer automatiquement;
+    end fork
+    
+    :Superposer résultats\nsur l'image;
+    :Afficher rapport d'analyse;
+    
+    |Orthodontiste|
+    :Valider résultats IA;
+    :Corriger si nécessaire;
+else (non)
+endif
+
+|Orthodontiste|
+:Sauvegarder image éditée;
+
+|Système|
+:Sauvegarder avec métadonnées;
+:Conserver version originale;
+:Mettre à jour galerie patient;
+:Indexer pour recherche;
+
+if (Ajouter au rapport ?) then (oui)
+    |Orthodontiste|
+    :Sélectionner pour rapport;
+    :Ajouter légende;
+    |Système|
+    :Inclure dans rapport patient;
+else (non)
+endif
+
+stop
+
+@enduml

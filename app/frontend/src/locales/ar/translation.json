@@ -1,0 +1,186 @@
+{
+  "app": {
+    "name": "سمارت أورثو",
+    "tagline": "إدارة عيادة تقويم الأسنان"
+  },
+  "language": {
+    "en": "الإنجليزية",
+    "fr": "الفرنسية",
+    "ar": "العربية"
+  },
+  "navigation": {
+    "dashboard": "لوحة التحكم",
+    "patients": "المرضى",
+    "appointments": "المواعيد",
+    "diagnostics": "التشخيصات",
+    "treatments": "العلاجات",
+    "communication": "التواصل",
+    "stock": "المخزون",
+    "administration": "الإدارة",
+    "aiTools": "أدوات الذكاء الاصطناعي",
+    "users": "المستخدمون"
+  },
+  "header": {
+    "search": "بحث",
+    "notifications": "عرض الإشعارات",
+    "markAllAsRead": "وضع علامة مقروء على الكل",
+    "viewAll": "عرض جميع الإشعارات"
+  },
+  "login": {
+    "subtitle": "إدارة عيادة تقويم الأسنان",
+    "email": "البريد الإلكتروني",
+    "emailPlaceholder": "أدخل بريدك الإلكتروني",
+    "password": "كلمة المرور",
+    "passwordPlaceholder": "أدخل كلمة المرور",
+    "rememberMe": "تذكرني",
+    "forgotPassword": "نسيت كلمة المرور؟",
+    "signIn": "تسجيل الدخول",
+    "signingIn": "جاري تسجيل الدخول...",
+    "noAccount": "ليس لديك حساب؟",
+    "signUp": "إنشاء حساب",
+    "invalidEmail": "يرجى إدخال عنوان بريد إلكتروني صالح",
+    "invalidPassword": "يجب أن تحتوي كلمة المرور على 6 أحرف على الأقل",
+    "features": {
+      "aiPowered": "مدعوم بالذكاء الاصطناعي",
+      "aiPoweredDesc": "تشخيصات ذكية وتخطيط العلاج",
+      "patientManagement": "إدارة المرضى",
+      "patientManagementDesc": "سجلات المرضى الكاملة والمتابعة",
+      "realTimeAnalytics": "تحليلات في الوقت الفعلي",
+      "realTimeAnalyticsDesc": "تتبع أداء عيادتك"
+    }
+  },
+  "dashboard": {
+    "welcome": "مرحباً بعودتك، د. دوبون",
+    "subtitle": "إليك ما يحدث في عيادتك اليوم",
+    "stats": {
+      "totalPatients": "إجمالي المرضى",
+      "appointmentsToday": "المواعيد اليوم",
+      "activePatients": "المرضى النشطون",
+      "completionRate": "معدل الإنجاز"
+    },
+    "todayAppointments": "مواعيد اليوم",
+    "recentPatients": "المرضى الأخيرون",
+    "streak": {
+      "days": "أيام",
+      "today": "اليوم",
+      "loggedInToday": "تم تسجيل الدخول اليوم",
+      "lastLogin": "آخر تسجيل دخول:",
+      "activeStreak": "سلسلة نشطة"
+    }
+  },
+  "patients": {
+    "title": "إدارة المرضى",
+    "subtitle": "إدارة ومتابعة جميع مرضاك",
+    "newPatient": "مريض جديد",
+    "search": "البحث عن المرضى...",
+    "filters": {
+      "all": "جميع المرضى",
+      "active": "نشط",
+      "inactive": "غير نشط",
+      "filter": "تصفية"
+    },
+    "name": "الاسم",
+    "bornOn": "تاريخ الميلاد",
+    "treatment": "العلاج",
+    "nextAppointment": "الموعد القادم",
+    "status": "الحالة",
+    "actions": "الإجراءات",
+    "view": "عرض",
+    "noMatch": "لم يتم العثور على مرضى مطابقين لبحثك",
+    "email": "البريد الإلكتروني",
+    "phone": "الهاتف",
+    "address": "العنوان"
+  },
+  "patientForm": {
+    "newPatient": "مريض جديد",
+    "personalInfo": "المعلومات الشخصية",
+    "medicalInfo": "المعلومات الطبية",
+    "contactDetails": "بيانات الاتصال",
+    "enterIdentityInfo": "أدخل معلومات هوية المريض",
+    "enterMedicalInfo": "أدخل المعلومات الطبية للمريض",
+    "firstName": "الاسم الأول",
+    "lastName": "اسم العائلة",
+    "dateOfBirth": "تاريخ الميلاد",
+    "profession": "المهنة",
+    "city": "المدينة",
+    "postalCode": "الرمز البريدي",
+    "insurance": "التأمين",
+    "selectInsurance": "اختر التأمين",
+    "fileNumber": "رقم الملف",
+    "primaryPhysician": "الطبيب المعالج",
+    "medicalHistory": "التاريخ الطبي",
+    "allergies": "الحساسية",
+    "additionalNotes": "ملاحظات إضافية",
+    "required": "هذا الحقل مطلوب",
+    "invalidEmail": "عنوان بريد إلكتروني غير صالح",
+    "invalidPhone": "رقم هاتف غير صالح",
+    "previous": "السابق",
+    "next": "التالي",
+    "cancel": "إلغاء",
+    "save": "حفظ"
+  },
+  "appointments": {
+    "title": "المواعيد",
+    "subtitle": "إدارة تقويم المواعيد الخاص بك",
+    "newAppointment": "موعد جديد",
+    "day": "يوم",
+    "week": "أسبوع",
+    "month": "شهر",
+    "calendar": {
+      "monday": "الإثنين",
+      "tuesday": "الثلاثاء",
+      "wednesday": "الأربعاء",
+      "thursday": "الخميس",
+      "friday": "الجمعة",
+      "saturday": "السبت",
+      "sunday": "الأحد"
+    },
+    "appointmentTypes": {
+      "initialConsultation": "استشارة أولية",
+      "checkup": "فحص",
+      "applianceInstallation": "تركيب جهاز",
+      "applianceRemoval": "إزالة جهاز",
+      "emergency": "طوارئ",
+      "adjustment": "تعديل",
+      "repair": "إصلاح",
+      "followUp": "متابعة"
+    },
+    "status": {
+      "scheduled": "مجدول",
+      "confirmed": "مؤكد",
+      "pending": "قيد الانتظار",
+      "completed": "مكتمل",
+      "cancelled": "ملغى",
+      "missed": "فائت"
+    }
+  },
+  "diagnostics": {
+    "title": "التشخيصات بالذكاء الاصطناعي",
+    "subtitle": "أدوات تشخيص متقدمة مدعومة بالذكاء الاصطناعي",
+    "tabs": {
+      "imageAnalysis": "تحليل الصور",
+      "treatmentPlans": "خطط العلاج",
+      "anomalyDetection": "كشف الشذوذ",
+      "treatmentDuration": "مدة العلاج"
+    }
+  },
+  "gamification": {
+    "level": {
+      "expertOrthodontist": "أخصائي تقويم أسنان خبير"
+    },
+    "badges": {
+      "title": "الشارات والإنجازات",
+      "patientCare": "خبير رعاية المرضى",
+      "perfectAttendance": "الحضور المثالي",
+      "quickLearner": "متعلم سريع",
+      "teamPlayer": "لاعب فريق",
+      "locked": "مقفل"
+    }
+  },
+  "stock": {
+    "lowStock": "تنبيه مخزون منخفض",
+    "lowStockItems": "عناصر",
+    "generateOrder": "إنشاء طلب",
+    "ignore": "تجاهل"
+  }
+}

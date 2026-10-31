@@ -1,0 +1,186 @@
+{
+  "app": {
+    "name": "SmartOrtho",
+    "tagline": "Gestion de Cabinet Orthodontique"
+  },
+  "language": {
+    "en": "Anglais",
+    "fr": "Français",
+    "ar": "Arabe"
+  },
+  "navigation": {
+    "dashboard": "Tableau de bord",
+    "patients": "Patients",
+    "appointments": "Rendez-vous",
+    "diagnostics": "Diagnostics",
+    "treatments": "Traitements",
+    "communication": "Communication",
+    "stock": "Stock",
+    "administration": "Administration",
+    "aiTools": "Outils IA",
+    "users": "Utilisateurs"
+  },
+  "header": {
+    "search": "Rechercher",
+    "notifications": "Voir les notifications",
+    "markAllAsRead": "Tout marquer comme lu",
+    "viewAll": "Voir toutes les notifications"
+  },
+  "login": {
+    "subtitle": "Gestion de Cabinet Orthodontique",
+    "email": "Email",
+    "emailPlaceholder": "Entrez votre email",
+    "password": "Mot de passe",
+    "passwordPlaceholder": "Entrez votre mot de passe",
+    "rememberMe": "Se souvenir de moi",
+    "forgotPassword": "Mot de passe oublié?",
+    "signIn": "Se connecter",
+    "signingIn": "Connexion en cours...",
+    "noAccount": "Vous n'avez pas de compte?",
+    "signUp": "S'inscrire",
+    "invalidEmail": "Veuillez entrer une adresse email valide",
+    "invalidPassword": "Le mot de passe doit contenir au moins 6 caractères",
+    "features": {
+      "aiPowered": "Propulsé par l'IA",
+      "aiPoweredDesc": "Diagnostics intelligents et planification de traitement",
+      "patientManagement": "Gestion des patients",
+      "patientManagementDesc": "Dossiers patients complets et suivi",
+      "realTimeAnalytics": "Analyses en temps réel",
+      "realTimeAnalyticsDesc": "Suivez les performances de votre cabinet"
+    }
+  },
+  "dashboard": {
+    "welcome": "Bienvenue Dr. Dupont",
+    "subtitle": "Voici ce qui se passe dans votre cabinet aujourd'hui",
+    "stats": {
+      "totalPatients": "Total Patients",
+      "appointmentsToday": "Rendez-vous aujourd'hui",
+      "activePatients": "Patients actifs",
+      "completionRate": "Taux de réussite"
+    },
+    "todayAppointments": "Rendez-vous du jour",
+    "recentPatients": "Patients récents",
+    "streak": {
+      "days": "jours",
+      "today": "aujourd'hui",
+      "loggedInToday": "Connecté aujourd'hui",
+      "lastLogin": "Dernière connexion:",
+      "activeStreak": "Série active"
+    }
+  },
+  "patients": {
+    "title": "Gestion des Patients",
+    "subtitle": "Gérer et suivre tous vos patients",
+    "newPatient": "Nouveau Patient",
+    "search": "Rechercher des patients...",
+    "filters": {
+      "all": "Tous les patients",
+      "active": "Actifs",
+      "inactive": "Inactifs",
+      "filter": "Filtrer"
+    },
+    "name": "Nom",
+    "bornOn": "Né(e) le",
+    "treatment": "Traitement",
+    "nextAppointment": "Prochain rendez-vous",
+    "status": "Statut",
+    "actions": "Actions",
+    "view": "Voir",
+    "noMatch": "Aucun patient ne correspond à votre recherche",
+    "email": "Email",
+    "phone": "Téléphone",
+    "address": "Adresse"
+  },
+  "patientForm": {
+    "newPatient": "Nouveau Patient",
+    "personalInfo": "Informations Personnelles",
+    "medicalInfo": "Informations Médicales",
+    "contactDetails": "Coordonnées",
+    "enterIdentityInfo": "Saisir les informations d'identité du patient",
+    "enterMedicalInfo": "Saisir les informations médicales du patient",
+    "firstName": "Prénom",
+    "lastName": "Nom",
+    "dateOfBirth": "Date de naissance",
+    "profession": "Profession",
+    "city": "Ville",
+    "postalCode": "Code postal",
+    "insurance": "Mutuelle",
+    "selectInsurance": "Sélectionner une mutuelle",
+    "fileNumber": "Numéro de dossier",
+    "primaryPhysician": "Médecin traitant",
+    "medicalHistory": "Antécédents médicaux",
+    "allergies": "Allergies",
+    "additionalNotes": "Notes additionnelles",
+    "required": "Ce champ est obligatoire",
+    "invalidEmail": "Adresse email invalide",
+    "invalidPhone": "Numéro de téléphone invalide",
+    "previous": "Précédent",
+    "next": "Suivant",
+    "cancel": "Annuler",
+    "save": "Enregistrer"
+  },
+  "appointments": {
+    "title": "Rendez-vous",
+    "subtitle": "Gérer votre calendrier de rendez-vous",
+    "newAppointment": "Nouveau rendez-vous",
+    "day": "Jour",
+    "week": "Semaine",
+    "month": "Mois",
+    "calendar": {
+      "monday": "Lun",
+      "tuesday": "Mar",
+      "wednesday": "Mer",
+      "thursday": "Jeu",
+      "friday": "Ven",
+      "saturday": "Sam",
+      "sunday": "Dim"
+    },
+    "appointmentTypes": {
+      "initialConsultation": "Consultation initiale",
+      "checkup": "Contrôle",
+      "applianceInstallation": "Pose appareil",
+      "applianceRemoval": "Dépose appareil",
+      "emergency": "Urgence",
+      "adjustment": "Ajustement",
+      "repair": "Réparation",
+      "followUp": "Suivi"
+    },
+    "status": {
+      "scheduled": "Planifié",
+      "confirmed": "Confirmé",
+      "pending": "En attente",
+      "completed": "Terminé",
+      "cancelled": "Annulé",
+      "missed": "Manqué"
+    }
+  },
+  "diagnostics": {
+    "title": "Diagnostics IA",
+    "subtitle": "Outils de diagnostic avancés alimentés par l'intelligence artificielle",
+    "tabs": {
+      "imageAnalysis": "Analyse d'images",
+      "treatmentPlans": "Plans de traitement",
+      "anomalyDetection": "Détection d'anomalies",
+      "treatmentDuration": "Durée de traitement"
+    }
+  },
+  "gamification": {
+    "level": {
+      "expertOrthodontist": "Orthodontiste Expert"
+    },
+    "badges": {
+      "title": "Badges et Réalisations",
+      "patientCare": "Expert en soins patients",
+      "perfectAttendance": "Assiduité parfaite",
+      "quickLearner": "Apprenant rapide",
+      "teamPlayer": "Joueur d'équipe",
+      "locked": "Verrouillé"
+    }
+  },
+  "stock": {
+    "lowStock": "Alerte stock faible",
+    "lowStockItems": "articles",
+    "generateOrder": "Générer une commande",
+    "ignore": "Ignorer"
+  }
+}
