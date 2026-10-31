@@ -16,8 +16,8 @@ spec:
     spec:
       containers:
         - name: backend
-          image: taskboard-api:2.0.0
-          imagePullPolicy: IfNotPresent
+          image: ghcr.io/yassinbenslima/taskboard-api:latest
+          imagePullPolicy: Always
 
           ports:
             - containerPort: 8080
