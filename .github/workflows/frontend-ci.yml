@@ -16,7 +16,7 @@ on:
       - '.github/workflows/frontend-ci.yml'
 
 permissions:
-  contents: read
+  contents: write
   packages: write
 
 jobs:
@@ -48,3 +48,20 @@ jobs:
           tags: |
             ghcr.io/yassinbenslima/taskboard-frontend:latest
             ghcr.io/yassinbenslima/taskboard-frontend:sha-${{ github.sha }}
+      - name: Update Kubernetes manifest
+        if: github.event_name == 'push'
+        run: |
+          sed -i "s|image: ghcr.io/yassinbenslima/taskboard-frontend:.*|image: ghcr.io/yassinbenslima/taskboard-frontend:sha-${GITHUB_SHA}|" k8s/base/frontend-deployment.yaml
+      - name: Commit and push manifest update
+        if: github.event_name == 'push'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          if ! git diff --quiet -- k8s/base/frontend-deployment.yaml; then
+            git add k8s/base/frontend-deployment.yaml
+            git commit -m "chore(gitops): update frontend image to sha-${GITHUB_SHA} [skip ci]"
+            git push
+          else
+            echo "No manifest changes detected."
+          fi
