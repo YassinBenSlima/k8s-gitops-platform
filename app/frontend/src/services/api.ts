@@ -1,4 +1,4 @@
-const API_BASE = 'http://localhost:5236/api';
+const API_BASE = '/api';
 
 interface ApiWrapper<T> {
   isSuccess: boolean;
