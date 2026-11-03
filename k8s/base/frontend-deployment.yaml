@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: ghcr.io/yassinbenslima/taskboard-frontend:sha-46069631f4da9c5c78c770f4238d14795f1ba6ab
+          image: ghcr.io/yassinbenslima/taskboard-frontend:sha-0ee87ac1a5f8874b9dece8a0fcf4affa02bf40c7
           imagePullPolicy: Always
           ports:
             - containerPort: 80
